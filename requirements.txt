@@ -20,6 +20,7 @@ Werkzeug==3.0.1
 # Utilities
 python-slugify==8.0.1
 python-dotenv==1.0.0
+markdown==3.5.1
 
 # Production Server
 gunicorn==21.2.0

@@ -110,7 +110,7 @@
 {% block extra_scripts %}
 <script>
     // Initialize EasyMDE Markdown Editor
-    const easyMDE = new EasyMDE({
+    window.easyMDE = new EasyMDE({
         element: document.getElementById('editor'),
         spellChecker: false,
         autosave: {
@@ -134,15 +134,11 @@
         status: ['lines', 'words', 'cursor'],
     });
 
-    // Handle form submission - convert markdown to HTML
+    // Sync EasyMDE to textarea before submit
     document.getElementById('postForm').addEventListener('submit', function (e) {
-        // Get the markdown content
-        const markdown = easyMDE.value();
-
-        // Convert to HTML using marked
-        if (typeof marked !== 'undefined') {
-            const html = marked.parse(markdown);
-            document.getElementById('editor').value = html;
+        if (window.easyMDE) {
+            // This ensures the textarea has the latest markdown value
+            document.getElementById('editor').value = window.easyMDE.value();
         }
     });
 </script>

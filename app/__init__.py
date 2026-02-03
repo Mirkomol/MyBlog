@@ -7,6 +7,7 @@ from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
 from config import config
 import os
+import markdown
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -49,7 +50,15 @@ def create_app(config_name=None):
             'blog_title': app.config['BLOG_TITLE'],
             'blog_subtitle': app.config['BLOG_SUBTITLE'],
             'blog_author': app.config['BLOG_AUTHOR']
+            'blog_author': app.config['BLOG_AUTHOR']
         }
+    
+    # Register Markdown filter
+    @app.template_filter('markdown')
+    def markdown_filter(content):
+        if not content:
+            return ""
+        return markdown.markdown(content, extensions=['fenced_code', 'tables'])
     
     # Create database tables
     with app.app_context():
