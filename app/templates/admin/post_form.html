@@ -23,6 +23,23 @@
     <form method="POST" enctype="multipart/form-data" class="post-form" id="postForm">
         {{ form.hidden_tag() }}
 
+        <!-- AI Generation Section -->
+        {% if not is_edit %}
+        <div class="ai-section">
+            <h3>✨ AI Blog Generator</h3>
+            <div class="ai-input-group">
+                <input type="text" id="aiPrompt" class="form-input"
+                    placeholder="Enter a topic (e.g., 'Benefits of microservices architecture')">
+                <button type="button" id="generateBtn" class="btn btn-ai">
+                    <span class="btn-text">Generate with AI</span>
+                    <span class="btn-loading" style="display: none;">Generating...</span>
+                </button>
+            </div>
+            <p class="form-hint">Enter a topic and let Gemini AI write your blog post!</p>
+            <div id="aiError" class="form-error" style="display: none;"></div>
+        </div>
+        {% endif %}
+
         <div class="form-layout">
             <div class="form-main">
                 <div class="form-group">
@@ -169,5 +186,122 @@
     .EasyMDEContainer .editor-toolbar {
         border-radius: var(--border-radius) var(--border-radius) 0 0;
     }
+
+    /* AI Section Styles */
+    .ai-section {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        border-radius: var(--border-radius-lg);
+        padding: 24px;
+        margin-bottom: 32px;
+    }
+
+    .ai-section h3 {
+        margin: 0 0 16px 0;
+        color: var(--color-primary);
+    }
+
+    .ai-input-group {
+        display: flex;
+        gap: 12px;
+    }
+
+    .ai-input-group .form-input {
+        flex: 1;
+    }
+
+    .btn-ai {
+        background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+        color: white;
+        white-space: nowrap;
+    }
+
+    .btn-ai:hover {
+        background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
+    }
+
+    .btn-ai:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const generateBtn = document.getElementById('generateBtn');
+        const aiPrompt = document.getElementById('aiPrompt');
+        const aiError = document.getElementById('aiError');
+
+        if (generateBtn) {
+            generateBtn.addEventListener('click', async function () {
+                const prompt = aiPrompt.value.trim();
+
+                if (!prompt) {
+                    aiError.textContent = 'Please enter a topic or prompt';
+                    aiError.style.display = 'block';
+                    return;
+                }
+
+                // Show loading state
+                generateBtn.disabled = true;
+                generateBtn.querySelector('.btn-text').style.display = 'none';
+                generateBtn.querySelector('.btn-loading').style.display = 'inline';
+                aiError.style.display = 'none';
+
+                try {
+                    const response = await fetch('/admin/generate-post', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+                        },
+                        body: JSON.stringify({ prompt: prompt })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Fill in the form fields
+                        document.getElementById('title').value = data.title;
+                        document.getElementById('excerpt').value = data.excerpt;
+                        document.getElementById('tags').value = data.tags;
+
+                        // Set markdown editor content
+                        if (window.easyMDE) {
+                            window.easyMDE.value(data.content);
+                        } else {
+                            document.getElementById('editor').value = data.content;
+                        }
+
+                        // Clear prompt and show success
+                        aiPrompt.value = '';
+                        aiError.textContent = '✅ Blog post generated! Review and edit as needed.';
+                        aiError.style.color = '#22c55e';
+                        aiError.style.display = 'block';
+                    } else {
+                        aiError.textContent = data.error || 'Generation failed';
+                        aiError.style.color = '';
+                        aiError.style.display = 'block';
+                    }
+                } catch (error) {
+                    aiError.textContent = 'Network error: ' + error.message;
+                    aiError.style.display = 'block';
+                } finally {
+                    // Reset button state
+                    generateBtn.disabled = false;
+                    generateBtn.querySelector('.btn-text').style.display = 'inline';
+                    generateBtn.querySelector('.btn-loading').style.display = 'none';
+                }
+            });
+
+            // Generate on Enter key
+            aiPrompt.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    generateBtn.click();
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

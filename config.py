@@ -26,6 +26,9 @@ class Config:
     BLOG_TITLE = os.environ.get('BLOG_TITLE') or 'AGIBLOG'
     BLOG_SUBTITLE = os.environ.get('BLOG_SUBTITLE') or 'Thoughts, stories and ideas'
     BLOG_AUTHOR = os.environ.get('BLOG_AUTHOR') or 'Mirkamol Rahimov'
+    
+    # AI Generation (Gemini)
+    GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY') or ''
 
 
 class DevelopmentConfig(Config):

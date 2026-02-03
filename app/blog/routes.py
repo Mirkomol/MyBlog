@@ -1,6 +1,6 @@
 # Blog Routes
 
-from flask import render_template, redirect, url_for, flash, request, current_app, abort
+from flask import render_template, redirect, url_for, flash, request, current_app, abort, jsonify
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from datetime import datetime
@@ -11,6 +11,13 @@ from app.blog import blog_bp
 from app.blog.forms import PostForm, SearchForm, AboutForm
 from app.models import Post, Tag, User, SiteSettings
 from app import db
+
+# Gemini AI for blog generation
+try:
+    import google.generativeai as genai
+    GEMINI_AVAILABLE = True
+except ImportError:
+    GEMINI_AVAILABLE = False
 
 
 def allowed_file(filename):
@@ -387,3 +394,75 @@ def admin_about():
                           form=form,
                           title='Edit About Page')
 
+
+@blog_bp.route('/admin/generate-post', methods=['POST'])
+@login_required
+def generate_post():
+    """Generate blog post content using Gemini AI."""
+    if not current_user.is_admin:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    # Check if Gemini is available
+    if not GEMINI_AVAILABLE:
+        return jsonify({'error': 'Gemini AI library not installed'}), 500
+    
+    # Get API key
+    api_key = current_app.config.get('GEMINI_API_KEY')
+    if not api_key:
+        return jsonify({'error': 'GEMINI_API_KEY not configured. Add it to your environment variables.'}), 400
+    
+    # Get prompt from request
+    data = request.get_json()
+    prompt = data.get('prompt', '')
+    
+    if not prompt:
+        return jsonify({'error': 'Please provide a topic or prompt'}), 400
+    
+    try:
+        # Configure Gemini
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        
+        # Create blog post prompt
+        blog_prompt = f"""Write a professional blog post about: {prompt}
+
+Requirements:
+- Write in a clear, engaging, and informative style
+- Use proper headings (## for main sections, ### for subsections)
+- Include an introduction and conclusion
+- Be approximately 500-800 words
+- Use markdown formatting
+- Write in first person as a tech professional
+- Make it SEO-friendly with relevant keywords
+
+Return ONLY the blog content in markdown format, nothing else."""
+
+        # Generate content
+        response = model.generate_content(blog_prompt)
+        content = response.text
+        
+        # Generate title
+        title_prompt = f"Generate a catchy, SEO-friendly blog post title about: {prompt}. Return ONLY the title, nothing else."
+        title_response = model.generate_content(title_prompt)
+        title = title_response.text.strip().strip('"')
+        
+        # Generate excerpt
+        excerpt_prompt = f"Write a 1-2 sentence summary/excerpt for a blog post about: {prompt}. Return ONLY the excerpt, nothing else."
+        excerpt_response = model.generate_content(excerpt_prompt)
+        excerpt = excerpt_response.text.strip()
+        
+        # Generate tags
+        tags_prompt = f"Generate 3-5 relevant tags (single words or short phrases) for a blog post about: {prompt}. Return them comma-separated, nothing else."
+        tags_response = model.generate_content(tags_prompt)
+        tags = tags_response.text.strip()
+        
+        return jsonify({
+            'success': True,
+            'title': title,
+            'content': content,
+            'excerpt': excerpt,
+            'tags': tags
+        })
+        
+    except Exception as e:
+        return jsonify({'error': f'AI generation failed: {str(e)}'}), 500
