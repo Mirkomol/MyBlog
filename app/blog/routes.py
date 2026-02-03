@@ -14,7 +14,7 @@ from app import db
 
 # Gemini AI for blog generation
 try:
-    import google.generativeai as genai
+    from google import genai
     GEMINI_AVAILABLE = True
 except ImportError:
     GEMINI_AVAILABLE = False
@@ -419,9 +419,8 @@ def generate_post():
         return jsonify({'error': 'Please provide a topic or prompt'}), 400
     
     try:
-        # Configure Gemini
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # Configure Gemini Client
+        client = genai.Client(api_key=api_key)
         
         # Create blog post prompt
         blog_prompt = f"""Write a professional blog post about: {prompt}
@@ -438,22 +437,34 @@ Requirements:
 Return ONLY the blog content in markdown format, nothing else."""
 
         # Generate content
-        response = model.generate_content(blog_prompt)
+        response = client.models.generate_content(
+            model='gemini-2.0-flash', 
+            contents=blog_prompt
+        )
         content = response.text
         
         # Generate title
         title_prompt = f"Generate a catchy, SEO-friendly blog post title about: {prompt}. Return ONLY the title, nothing else."
-        title_response = model.generate_content(title_prompt)
+        title_response = client.models.generate_content(
+            model='gemini-2.0-flash',
+            contents=title_prompt
+        )
         title = title_response.text.strip().strip('"')
         
         # Generate excerpt
         excerpt_prompt = f"Write a 1-2 sentence summary/excerpt for a blog post about: {prompt}. Return ONLY the excerpt, nothing else."
-        excerpt_response = model.generate_content(excerpt_prompt)
+        excerpt_response = client.models.generate_content(
+            model='gemini-2.0-flash',
+            contents=excerpt_prompt
+        )
         excerpt = excerpt_response.text.strip()
         
         # Generate tags
         tags_prompt = f"Generate 3-5 relevant tags (single words or short phrases) for a blog post about: {prompt}. Return them comma-separated, nothing else."
-        tags_response = model.generate_content(tags_prompt)
+        tags_response = client.models.generate_content(
+            model='gemini-2.0-flash',
+            contents=tags_prompt
+        )
         tags = tags_response.text.strip()
         
         return jsonify({
