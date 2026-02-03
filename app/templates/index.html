@@ -23,7 +23,7 @@
                 <p class="featured-excerpt">{{ featured_post.excerpt or featured_post.content[:200] | striptags }}...
                 </p>
                 <div class="featured-meta">
-                    <span class="author">{{ featured_post.author.username }}</span>
+                    <span class="author">{{ featured_blog_author }}</span>
                     <span class="separator">·</span>
                     <span class="date">{{ featured_post.published_at.strftime('%b %d, %Y') if featured_post.published_at
                         else 'Draft' }}</span>
@@ -48,7 +48,7 @@
                     <a href="{{ url_for('blog.view_post', slug=post.slug) }}" class="post-card-link">
                         <div class="post-card-content">
                             <div class="post-card-meta">
-                                <span class="author">{{ post.author.username }}</span>
+                                <span class="author">{{ blog_author }}</span>
                                 <span class="separator">·</span>
                                 <span class="date">{{ post.published_at.strftime('%b %d') if post.published_at else
                                     'Draft' }}</span>
