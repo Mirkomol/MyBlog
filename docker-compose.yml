@@ -1,0 +1,22 @@
+# Simple Docker Compose - SQLite (No PostgreSQL needed!)
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5002:5002"
+    environment:
+      - FLASK_CONFIG=production
+      - SECRET_KEY=${SECRET_KEY:-change-this-in-production}
+      - BLOG_TITLE=${BLOG_TITLE:-AGIBLOG}
+      - BLOG_SUBTITLE=${BLOG_SUBTITLE:-Thoughts, stories and ideas}
+      - BLOG_AUTHOR=${BLOG_AUTHOR:-Mirkamol Rahimov}
+    volumes:
+      - blog_data:/app/data
+      - uploads:/app/app/static/uploads
+    restart: unless-stopped
+
+volumes:
+  blog_data:
+  uploads:

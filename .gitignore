@@ -1,0 +1,43 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Environment variables
+.env
+
+# Database
+*.db
+*.sqlite3
+instance/
+
+# Uploads (keep the folder, ignore contents)
+app/static/uploads/*
+!app/static/uploads/.gitkeep
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Flask
+instance/
+
+# Migrations (optional - you may want to version control these)
+# migrations/
+
+# Docker
+.docker/

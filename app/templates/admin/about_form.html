@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <a href="{{ url_for('blog.admin_dashboard') }}" class="back-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            Back to Dashboard
+        </a>
+        <h1>Edit About Page</h1>
+    </div>
+
+    <form method="POST" class="settings-form">
+        {{ form.hidden_tag() }}
+
+        <div class="form-section">
+            <h3>Page Content</h3>
+
+            <div class="form-group">
+                <label for="about_title">{{ form.about_title.label.text }}</label>
+                {{ form.about_title(class="form-input", placeholder="Welcome to my blog") }}
+                <span class="form-hint">Main heading on the About page</span>
+            </div>
+
+            <div class="form-group">
+                <label for="about_intro">{{ form.about_intro.label.text }}</label>
+                {{ form.about_intro(class="form-input") }}
+                <span class="form-hint">Brief introduction shown below the author box</span>
+            </div>
+
+            <div class="form-group">
+                <label for="about_content">{{ form.about_content.label.text }}</label>
+                {{ form.about_content(class="form-input") }}
+                <span class="form-hint">Main content of your About page. Markdown is supported.</span>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Social Links</h3>
+
+            <div class="form-group">
+                <label for="twitter_url">{{ form.twitter_url.label.text }}</label>
+                {{ form.twitter_url(class="form-input") }}
+            </div>
+
+            <div class="form-group">
+                <label for="github_url">{{ form.github_url.label.text }}</label>
+                {{ form.github_url(class="form-input") }}
+            </div>
+
+            <div class="form-group">
+                <label for="linkedin_url">{{ form.linkedin_url.label.text }}</label>
+                {{ form.linkedin_url(class="form-input") }}
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a href="{{ url_for('blog.about') }}" class="btn btn-secondary" target="_blank">Preview About Page</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<style>
+    .settings-form {
+        max-width: 800px;
+    }
+
+    .form-section {
+        background: var(--color-bg-secondary);
+        padding: 24px;
+        border-radius: var(--border-radius-lg);
+        margin-bottom: 24px;
+    }
+
+    .form-section h3 {
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 16px;
+        margin-top: 24px;
+    }
+
+    .btn-secondary {
+        background: var(--color-bg-secondary);
+        color: var(--color-text);
+        border: 1px solid var(--color-border);
+    }
+
+    .btn-secondary:hover {
+        background: var(--color-bg);
+    }
+</style>
+{% endblock %}

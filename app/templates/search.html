@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-container">
+    <div class="search-header">
+        <h1 class="page-title">
+            {% if query %}
+            Results for: <span class="search-highlight">"{{ query }}"</span>
+            {% else %}
+            Search
+            {% endif %}
+        </h1>
+
+        <form action="{{ url_for('blog.search') }}" method="GET" class="search-form-large">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search posts..." class="search-input-large"
+                autofocus>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    </div>
+
+    {% if posts %}
+    {% if posts.items %}
+    <p class="results-count">Found {{ posts.total }} result{{ 's' if posts.total != 1 else '' }}</p>
+
+    <div class="posts-list">
+        {% for post in posts.items %}
+        <article class="post-card">
+            <a href="{{ url_for('blog.view_post', slug=post.slug) }}" class="post-card-link">
+                <div class="post-card-content">
+                    <div class="post-card-meta">
+                        <span class="author">{{ post.author.username }}</span>
+                        <span class="separator">·</span>
+                        <span class="date">{{ post.published_at.strftime('%b %d') if post.published_at else 'Draft'
+                            }}</span>
+                    </div>
+                    <h3 class="post-card-title">{{ post.title }}</h3>
+                    <p class="post-card-excerpt">{{ post.excerpt or post.content[:150] | striptags }}...</p>
+                    <span class="reading-time">{{ post.reading_time }} min read</span>
+                </div>
+                {% if post.cover_image %}
+                <div class="post-card-image">
+                    <img src="{{ url_for('static', filename='uploads/' + post.cover_image) }}" alt="{{ post.title }}">
+                </div>
+                {% endif %}
+            </a>
+        </article>
+        {% endfor %}
+    </div>
+
+    {% if posts.pages > 1 %}
+    <nav class="pagination">
+        {% if posts.has_prev %}
+        <a href="{{ url_for('blog.search', q=query, page=posts.prev_num) }}" class="pagination-btn">← Previous</a>
+        {% endif %}
+        <span class="pagination-info">Page {{ posts.page }} of {{ posts.pages }}</span>
+        {% if posts.has_next %}
+        <a href="{{ url_for('blog.search', q=query, page=posts.next_num) }}" class="pagination-btn">Next →</a>
+        {% endif %}
+    </nav>
+    {% endif %}
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <h3>No results found</h3>
+        <p>Try different keywords</p>
+    </div>
+    {% endif %}
+    {% elif query %}
+    <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <h3>No results found</h3>
+        <p>Try different keywords</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

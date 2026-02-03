@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<!-- EasyMDE Markdown Editor (Free, no API key required) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <a href="{{ url_for('blog.admin_posts') }}" class="back-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            Back to Posts
+        </a>
+        <h1>{{ 'Edit Post' if is_edit else 'New Post' }}</h1>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" class="post-form" id="postForm">
+        {{ form.hidden_tag() }}
+
+        <div class="form-layout">
+            <div class="form-main">
+                <div class="form-group">
+                    <label for="title">{{ form.title.label.text }}</label>
+                    {{ form.title(class="form-input form-input-large", placeholder="Enter your post title...") }}
+                    {% if form.title.errors %}
+                    <span class="form-error">{{ form.title.errors[0] }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="excerpt">{{ form.excerpt.label.text }}</label>
+                    {{ form.excerpt(class="form-input") }}
+                    <span class="form-hint">A brief summary shown in post previews (optional)</span>
+                    {% if form.excerpt.errors %}
+                    <span class="form-error">{{ form.excerpt.errors[0] }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="content">{{ form.content.label.text }} (Markdown supported)</label>
+                    {{ form.content(class="form-input", id="editor") }}
+                    {% if form.content.errors %}
+                    <span class="form-error">{{ form.content.errors[0] }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-sidebar">
+                <div class="sidebar-card">
+                    <h3>Publish</h3>
+                    <div class="checkbox-group">
+                        {{ form.is_published(class="form-checkbox", id="is_published") }}
+                        <label for="is_published" class="checkbox-label">Publish Post</label>
+                    </div>
+                    <div class="checkbox-group">
+                        {{ form.is_featured(class="form-checkbox", id="is_featured") }}
+                        <label for="is_featured" class="checkbox-label">Featured Post</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">
+                        {{ 'Update Post' if is_edit else 'Save Post' }}
+                    </button>
+                </div>
+
+                <div class="sidebar-card">
+                    <h3>Cover Image</h3>
+                    {% if is_edit and post.cover_image %}
+                    <div class="current-image">
+                        <img src="{{ url_for('static', filename='uploads/' + post.cover_image) }}" alt="Current cover">
+                        <span class="image-label">Current cover image</span>
+                    </div>
+                    {% endif %}
+                    {{ form.cover_image(class="form-input-file") }}
+                    <span class="form-hint">Recommended: 1200x630px</span>
+                </div>
+
+                <div class="sidebar-card">
+                    <h3>Tags</h3>
+                    {{ form.tags(class="form-input") }}
+                    <span class="form-hint">Separate tags with commas</span>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Initialize EasyMDE Markdown Editor
+    const easyMDE = new EasyMDE({
+        element: document.getElementById('editor'),
+        spellChecker: false,
+        autosave: {
+            enabled: true,
+            uniqueId: 'blog-post-editor',
+            delay: 1000,
+        },
+        toolbar: [
+            'bold', 'italic', 'heading', '|',
+            'quote', 'unordered-list', 'ordered-list', '|',
+            'link', 'image', '|',
+            'preview', 'side-by-side', 'fullscreen', '|',
+            'guide'
+        ],
+        minHeight: '400px',
+        placeholder: 'Write your post content here... (Markdown supported)',
+        renderingConfig: {
+            singleLineBreaks: false,
+            codeSyntaxHighlighting: true,
+        },
+        status: ['lines', 'words', 'cursor'],
+    });
+
+    // Handle form submission - convert markdown to HTML
+    document.getElementById('postForm').addEventListener('submit', function (e) {
+        // Get the markdown content
+        const markdown = easyMDE.value();
+
+        // Convert to HTML using marked
+        if (typeof marked !== 'undefined') {
+            const html = marked.parse(markdown);
+            document.getElementById('editor').value = html;
+        }
+    });
+</script>
+<style>
+    /* EasyMDE Dark Mode Support */
+    [data-theme="dark"] .EasyMDEContainer .CodeMirror {
+        background: var(--color-bg-secondary);
+        color: var(--color-text);
+        border-color: var(--color-border);
+    }
+
+    [data-theme="dark"] .EasyMDEContainer .editor-toolbar {
+        background: var(--color-bg-secondary);
+        border-color: var(--color-border);
+    }
+
+    [data-theme="dark"] .EasyMDEContainer .editor-toolbar button {
+        color: var(--color-text-secondary);
+    }
+
+    [data-theme="dark"] .EasyMDEContainer .editor-toolbar button:hover {
+        background: var(--color-bg);
+    }
+
+    [data-theme="dark"] .EasyMDEContainer .editor-preview {
+        background: var(--color-bg);
+    }
+
+    [data-theme="dark"] .EasyMDEContainer .CodeMirror-cursor {
+        border-color: var(--color-text);
+    }
+
+    .EasyMDEContainer {
+        border-radius: var(--border-radius);
+    }
+
+    .EasyMDEContainer .CodeMirror {
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
+    }
+
+    .EasyMDEContainer .editor-toolbar {
+        border-radius: var(--border-radius) var(--border-radius) 0 0;
+    }
+</style>
+{% endblock %}
