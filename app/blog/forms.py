@@ -15,9 +15,7 @@ class PostForm(FlaskForm):
     excerpt = TextAreaField('Excerpt', validators=[
         Length(max=500, message='Excerpt must be less than 500 characters')
     ], render_kw={'rows': 3, 'placeholder': 'Brief description of your post...'})
-    content = TextAreaField('Content', validators=[
-        DataRequired(message='Content is required')
-    ], render_kw={'rows': 20})
+    content = TextAreaField('Content', render_kw={'rows': 20})  # No required attr - EasyMDE handles validation
     cover_image = FileField('Cover Image', validators=[
         FileAllowed(['jpg', 'jpeg', 'png', 'gif', 'webp'], 'Images only!')
     ])
