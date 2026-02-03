@@ -438,7 +438,7 @@ Return ONLY the blog content in markdown format, nothing else."""
 
         # Generate content
         response = client.models.generate_content(
-            model='gemini-2.0-flash', 
+            model='gemini-2.5-flash', 
             contents=blog_prompt
         )
         content = response.text
@@ -446,7 +446,7 @@ Return ONLY the blog content in markdown format, nothing else."""
         # Generate title
         title_prompt = f"Generate a catchy, SEO-friendly blog post title about: {prompt}. Return ONLY the title, nothing else."
         title_response = client.models.generate_content(
-            model='gemini-2.0-flash',
+            model='gemini-2.5-flash',
             contents=title_prompt
         )
         title = title_response.text.strip().strip('"')
@@ -454,7 +454,7 @@ Return ONLY the blog content in markdown format, nothing else."""
         # Generate excerpt
         excerpt_prompt = f"Write a 1-2 sentence summary/excerpt for a blog post about: {prompt}. Return ONLY the excerpt, nothing else."
         excerpt_response = client.models.generate_content(
-            model='gemini-2.0-flash',
+            model='gemini-2.5-flash',
             contents=excerpt_prompt
         )
         excerpt = excerpt_response.text.strip()
@@ -462,7 +462,7 @@ Return ONLY the blog content in markdown format, nothing else."""
         # Generate tags
         tags_prompt = f"Generate 3-5 relevant tags (single words or short phrases) for a blog post about: {prompt}. Return them comma-separated, nothing else."
         tags_response = client.models.generate_content(
-            model='gemini-2.0-flash',
+            model='gemini-2.5-flash',
             contents=tags_prompt
         )
         tags = tags_response.text.strip()
